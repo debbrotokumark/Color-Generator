@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PalettePro — Color Palette Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg: #f5f3ef;
+  --bg2: #ece9e3;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
+  --border: #ddd9d1;
+  --border2: #c8c3ba;
+  --text: #1c1a17;
+  --text2: #6b6660;
+  --text3: #a09b94;
+  --accent: #e8500a;
+  --accent-hover: #c94208;
+  --accent-soft: #fde8de;
+  --green: #22a06b;
+  --yellow: #d97706;
+  --red: #dc2626;
+  --blue: #2563eb;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow: 0 2px 12px rgba(0,0,0,0.09);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.13);
+  --r: 12px;
+  --r-sm: 7px;
+  --sidebar: 290px;
+}
+[data-theme="dark"] {
+  --bg: #131210;
+  --bg2: #1a1917;
+  --surface: #201f1d;
+  --surface2: #272523;
+  --border: #302e2b;
+  --border2: #3e3b37;
+  --text: #f0ede8;
+  --text2: #9e9891;
+  --text3: #6b6560;
+  --accent: #ff6a2a;
+  --accent-hover: #ff813f;
+  --accent-soft: #2a1a10;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.25);
+  --shadow: 0 2px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* ── LAYOUT ─────────────────────────────────── */
+#layout{display:flex;min-height:100vh;}
+#sidebar{width:var(--sidebar);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+#main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+/* ── HEADER ──────────────────────────────────── */
+#topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;letter-spacing:-0.02em;color:var(--text);}
+.logo span{color:var(--accent);}
+.topbar-count{font-family:'Space Mono',monospace;font-size:11px;color:var(--text3);background:var(--surface2);padding:3px 8px;border-radius:20px;border:1px solid var(--border);}
+
+/* ── SIDEBAR SECTIONS ──────────────────────── */
+.s-section{padding:14px 16px;border-bottom:1px solid var(--border);}
+.s-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:block;}
+
+/* ── BUTTONS ─────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:var(--r-sm);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;line-height:1;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-hover);}
+.btn-ghost{background:transparent;color:var(--text2);border:1.5px solid var(--border);}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);border-color:var(--border2);}
+.btn-soft{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-soft:hover{background:var(--bg2);color:var(--text);}
+.btn-danger{background:transparent;color:var(--red);border:1.5px solid transparent;}
+.btn-danger:hover{background:#fef2f2;border-color:#fecaca;}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.btn-xs{padding:3px 7px;font-size:11px;}
+.btn-icon{width:30px;height:30px;padding:0;border-radius:var(--r-sm);}
+.btn-block{width:100%;}
+
+/* ── INPUTS ─────────────────────────────────── */
+.input{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:8px 11px;font-family:'Space Mono',monospace;font-size:12px;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;width:100%;}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.input.error{border-color:var(--red);}
+select.input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a09b94' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+
+/* ── COLOR PICKER ROW ───────────────────────── */
+.picker-row{display:flex;gap:8px;align-items:center;}
+.color-swatch-input{width:40px;height:36px;padding:2px;border-radius:var(--r-sm);border:1.5px solid var(--border);cursor:pointer;background:var(--surface2);}
+
+/* ── TABS ───────────────────────────────────── */
+.tabs{display:flex;background:var(--surface2);border-radius:var(--r-sm);padding:3px;gap:2px;}
+.tab{flex:1;padding:5px 8px;font-size:11px;font-weight:600;border:none;background:transparent;color:var(--text3);cursor:pointer;border-radius:5px;transition:all .15s;font-family:'Outfit',sans-serif;}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);}
+
+/* ── DIVIDER ────────────────────────────────── */
+.div{height:1px;background:var(--border);margin:10px 0;}
+
+/* ── COLOR CARDS GRID ───────────────────────── */
+#grid{display:grid;gap:10px;padding:16px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+
+/* ── COLOR CARD ─────────────────────────────── */
+.cc{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow .2s,transform .2s,border-color .15s;animation:cardIn .25s ease;cursor:default;position:relative;}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.cc:hover{box-shadow:var(--shadow);transform:translateY(-2px);}
+.cc.locked .cc-swatch::after{content:'🔒';position:absolute;top:7px;left:7px;font-size:13px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));}
+.cc.grad-sel{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.cc.dragging{opacity:.45;box-shadow:var(--shadow-lg);}
+.cc.drag-over{border-color:var(--accent);border-style:dashed;}
+.cc-swatch{height:110px;position:relative;cursor:pointer;}
+.cc-swatch:hover .cc-hint{opacity:1;}
+.cc-hint{position:absolute;inset:0;background:rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-size:11px;font-weight:700;color:#fff;letter-spacing:.06em;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+.cc-wcag{position:absolute;top:7px;right:7px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.45);color:#fff;letter-spacing:.04em;}
+.cc-body{padding:10px;}
+.cc-hex{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--text);}
+.cc-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px;}
+.cc-contrast{font-size:10px;font-weight:600;margin-top:4px;}
+.cc-actions{display:flex;gap:3px;margin-top:8px;flex-wrap:wrap;}
+.cc-btn{width:26px;height:26px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .12s;color:var(--text2);}
+.cc-btn:hover{background:var(--bg2);border-color:var(--border2);color:var(--text);}
+.cc-btn.danger:hover{background:#fef2f2;border-color:#fecaca;color:var(--red);}
+.cc-btn.star{color:var(--text3);}
+.cc-btn.star.on{color:#f59e0b;}
+.cc-btn.grad-on{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ── EMPTY ──────────────────────────────────── */
+#empty{display:none;text-align:center;padding:80px 20px;}
+.empty-icon{font-size:52px;display:block;margin-bottom:14px;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* ── TOAST ──────────────────────────────────── */
+#toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;}
+.toast{background:var(--text);color:var(--bg);padding:8px 18px;border-radius:99px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);animation:toastIn .2s ease;pointer-events:auto;white-space:nowrap;}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px) scale(.95)}to{opacity:1;transform:none}}
+.toast.out{animation:toastOut .2s ease forwards;}
+@keyframes toastOut{to{opacity:0;transform:translateY(8px) scale(.95)}}
+
+/* ── MODAL ──────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(5px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .15s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border-radius:var(--r);padding:24px;max-width:520px;width:100%;box-shadow:var(--shadow-lg);animation:modalIn .2s ease;border:1px solid var(--border);}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:16px;color:var(--text);}
+
+/* ── GRADIENT PREVIEW ─────────────────────── */
+#grad-preview{height:72px;border-radius:var(--r-sm);border:1px solid var(--border);transition:background .3s;margin-bottom:10px;}
+
+/* ── HISTORY SWATCHES ─────────────────────── */
+.h-swatch{width:26px;height:26px;border-radius:5px;cursor:pointer;border:1.5px solid transparent;transition:all .12s;box-shadow:var(--shadow-sm);flex-shrink:0;}
+.h-swatch:hover{transform:scale(1.25);border-color:var(--text);}
+
+/* ── UPLOAD ZONE ─────────────────────────── */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r-sm);padding:24px 12px;text-align:center;cursor:pointer;transition:all .15s;color:var(--text3);}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+.upload-zone input{display:none;}
+
+/* ── CODE BLOCK ──────────────────────────── */
+.code-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text2);overflow:auto;max-height:180px;white-space:pre;line-height:1.6;}
+
+/* ── TOOLTIP ─────────────────────────────── */
+[data-tip]{position:relative;}
+[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100%+6px);left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);font-size:11px;font-weight:500;padding:4px 8px;border-radius:5px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .12s;z-index:200;}
+[data-tip]:hover::after{opacity:1;}
+
+/* ── IMPORT AREA ─────────────────────────── */
+.import-textarea{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:10px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text);outline:none;width:100%;resize:vertical;min-height:90px;transition:border-color .15s;}
+.import-textarea:focus{border-color:var(--accent);}
+
+/* ── SCROLLABLE ──────────────────────────── */
+.scroll-y{overflow-y:auto;max-height:160px;}
+
+/* ── KBD ─────────────────────────────────── */
+kbd{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text2);}
+
+/* ── MOBILE ──────────────────────────────── */
+#mob-toggle{display:none;width:36px;height:36px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;align-items:center;justify-content:center;font-size:16px;color:var(--text);}
+@media(max-width:768px){
+  #sidebar{position:fixed;left:0;top:0;bottom:0;z-index:300;transform:translateX(-100%);transition:transform .25s;box-shadow:var(--shadow-lg);}
+  #sidebar.open{transform:none;}
+  #mob-toggle{display:flex;}
+  #layout{flex-direction:column;}
+  #main{min-height:100vh;}
+  #grid{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ── DRAG HANDLE ─────────────────────────── */
+.drag-handle{cursor:grab;color:var(--text3);font-size:14px;padding:2px 4px;}
+.drag-handle:active{cursor:grabbing;}
+
+/* ── SORT ROW ────────────────────────────── */
+.sort-row{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap;}
+
+/* ── BULK SELECT ─────────────────────────── */
+.cc-checkbox{position:absolute;top:8px;left:8px;z-index:10;width:16px;height:16px;accent-color:var(--accent);cursor:pointer;display:none;}
+body.select-mode .cc-checkbox{display:block;}
+body.select-mode .cc-swatch{padding-left:26px;}
+
+/* ── IMPORT BADGE ────────────────────────── */
+.format-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:600;background:var(--surface2);color:var(--text3);border:1px solid var(--border);}
+
+/* ── FADE IN ─────────────────────────────── */
+.fade{animation:fadeIn .3s ease;}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+
+<!-- SIDEBAR -->
+<div id="layout">
+<aside id="sidebar">
+  <!-- Logo -->
+  <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+    <span class="logo">Palette<span>Pro</span></span>
+    <div style="display:flex;gap:5px;">
+      <button class="btn btn-icon btn-soft" onclick="toggleTheme()" id="theme-btn" data-tip="Toggle theme (T)">🌙</button>
+    </div>
+  </div>
+
+  <!-- Add Color -->
+  <div class="s-section">
+    <span class="s-label">Add Color</span>
+    <div class="picker-row" style="margin-bottom:8px;">
+      <input type="color" id="cpicker" class="color-swatch-input" value="#e8500a" oninput="syncPicker('picker')" />
+      <input type="text" id="hexin" class="input" placeholder="#e8500a" maxlength="9" oninput="syncPicker('text')" onkeydown="if(event.key==='Enter')addFromInput()" style="flex:1;" />
+    </div>
+    <p id="hexerr" style="color:var(--red);font-size:11px;margin-bottom:6px;display:none;"></p>
+    <button class="btn btn-primary btn-block" onclick="addFromInput()">+ Add Color</button>
+  </div>
+
+  <!-- Generate -->
+  <div class="s-section">
+    <span class="s-label">Generate</span>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <button class="btn btn-soft btn-block" onclick="genRandom()" data-tip="R">🎲 Random Palette</button>
+      <div style="display:flex;gap:6px;">
+        <select class="input" id="smart-type" style="flex:1;font-family:'Outfit',sans-serif;font-size:12px;">
+          <option value="complementary">Complementary</option>
+          <option value="analogous">Analogous</option>
+          <option value="triadic">Triadic</option>
+          <option value="split-comp">Split Comp</option>
+          <option value="tetradic">Tetradic</option>
+          <option value="monochromatic">Monochromatic</option>
+          <option value="shades">Shades</option>
+        </select>
+        <button class="btn btn-soft" onclick="genSmart()" data-tip="Smart from base color" style="padding:8px 10px;">✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="s-section">
+    <span class="s-label">View</span>
+    <div class="tabs" style="margin-bottom:8px;">
+      <button class="tab active" onclick="setFilter('all',this)">All</button>
+      <button class="tab" onclick="setFilter('favorites',this)">⭐ Favs</button>
+      <button class="tab" onclick="setFilter('locked',this)">🔒 Lock</button>
+    </div>
+    <input type="text" id="searchin" class="input" placeholder="🔍 Search hex or name…" oninput="render()" style="font-family:'Outfit',sans-serif;font-size:12px;" />
+  </div>
+
+  <!-- Gradient -->
+  <div class="s-section">
+    <span class="s-label">Gradient Builder</span>
+    <div id="grad-preview" style="background:linear-gradient(135deg,#e8500a,#2563eb);"></div>
+    <select class="input" id="grad-dir" onchange="updateGradient()" style="font-family:'Outfit',sans-serif;font-size:12px;margin-bottom:8px;">
+      <option value="to right">→ Horizontal</option>
+      <option value="to bottom">↓ Vertical</option>
+      <option value="135deg">↘ Diagonal</option>
+      <option value="to bottom right">↘ Corner</option>
+      <option value="circle">◎ Radial</option>
+    </select>
+    <p style="font-size:10px;color:var(--text3);margin-bottom:5px;">Click ↔ on cards to add to gradient</p>
+    <div id="grad-sel-swatches" style="display:flex;flex-wrap:wrap;gap:4px;min-height:24px;margin-bottom:8px;"></div>
+    <code id="grad-css" style="font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);word-break:break-all;display:block;margin-bottom:8px;line-height:1.5;"></code>
+    <button class="btn btn-soft btn-sm btn-block" onclick="copyGradCSS()">📋 Copy CSS</button>
+  </div>
+
+  <!-- Import / Export -->
+  <div class="s-section">
+    <span class="s-label">Import / Export</span>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <button class="btn btn-soft btn-sm btn-block" onclick="openImportModal()">📥 Import Colors</button>
+      <button class="btn btn-soft btn-sm btn-block" onclick="openExportModal()">📤 Export Palette</button>
+      <button class="btn btn-soft btn-sm btn-block" onclick="openShareModal()">🔗 Share URL</button>
+    </div>
+  </div>
+
+  <!-- Image Extract -->
+  <div class="s-section">
+    <span class="s-label">Extract from Image</span>
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('img-upload').click()">
+      <input type="file" id="img-upload" accept="image/*" onchange="extractColors(event)" />
+      <div style="font-size:24px;margin-bottom:6px;">🖼️</div>
+      <p style="font-size:11px;">Click or drop image</p>
+    </div>
+    <canvas id="img-canvas" style="display:none;"></canvas>
+  </div>
+
+  <!-- History -->
+  <div class="s-section">
+    <span class="s-label">Recent</span>
+    <div id="history" style="display:flex;flex-wrap:wrap;gap:5px;min-height:24px;"></div>
+  </div>
+
+  <!-- Keyboard Shortcuts -->
+  <div class="s-section">
+    <span class="s-label">Shortcuts</span>
+    <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--text2);">
+      <div style="display:flex;justify-content:space-between;"><span>Add color</span><kbd>A</kbd></div>
+      <div style="display:flex;justify-content:space-between;"><span>Random</span><kbd>R</kbd></div>
+      <div style="display:flex;justify-content:space-between;"><span>Undo</span><kbd>Ctrl+Z</kbd></div>
+      <div style="display:flex;justify-content:space-between;"><span>Redo</span><kbd>Ctrl+Y</kbd></div>
+      <div style="display:flex;justify-content:space-between;"><span>Theme</span><kbd>T</kbd></div>
+      <div style="display:flex;justify-content:space-between;"><span>Clear all</span><kbd>Backspace</kbd></div>
+    </div>
+  </div>
+
+  <div style="padding:14px 16px;margin-top:auto;border-top:1px solid var(--border);">
+    <button class="btn btn-danger btn-sm btn-block" onclick="clearAll()">🗑 Clear All</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- Top Bar -->
+  <div id="topbar">
+    <button id="mob-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <span class="logo" style="margin-right:4px;">Palette<span>Pro</span></span>
+    <span class="topbar-count" id="count">0 colors</span>
+    <div style="flex:1;"></div>
+    <button class="btn btn-ghost btn-sm" id="undo-btn" onclick="undo()" data-tip="Undo (Ctrl+Z)" style="opacity:.4;">↩ Undo</button>
+    <button class="btn btn-ghost btn-sm" id="redo-btn" onclick="redo()" data-tip="Redo (Ctrl+Y)" style="opacity:.4;">↪ Redo</button>
+    <button class="btn btn-soft btn-sm" onclick="copyAllHex()">📋 Copy All</button>
+    <button class="btn btn-primary btn-sm" onclick="openExportModal()">Export ↓</button>
+  </div>
+
+  <!-- Sort/Filter row -->
+  <div class="sort-row">
+    <span style="font-size:11px;color:var(--text3);font-weight:600;">Sort:</span>
+    <button class="btn btn-xs btn-soft" onclick="sortColors('hue')">By Hue</button>
+    <button class="btn btn-xs btn-soft" onclick="sortColors('light')">By Light</button>
+    <button class="btn btn-xs btn-soft" onclick="sortColors('sat')">By Sat</button>
+    <button class="btn btn-xs btn-soft" onclick="sortColors('alpha')">A-Z</button>
+    <div style="flex:1;"></div>
+    <label style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:5px;cursor:pointer;">
+      <input type="checkbox" id="bulk-mode" onchange="toggleBulk(this)" style="accent-color:var(--accent);cursor:pointer;" /> Select mode
+    </label>
+    <button id="bulk-delete-btn" class="btn btn-xs btn-danger" onclick="bulkDelete()" style="display:none;">Delete selected</button>
+  </div>
+
+  <!-- Grid -->
+  <div id="grid"></div>
+
+  <!-- Empty -->
+  <div id="empty">
+    <span class="empty-icon">🎨</span>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;">Your palette is empty</h2>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:18px;">Add colors manually, generate a palette, or import from a file.</p>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="addFromInput()">+ Add Color</button>
+      <button class="btn btn-ghost" onclick="genRandom()">🎲 Random</button>
+      <button class="btn btn-ghost" onclick="openImportModal()">📥 Import</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ IMPORT MODAL ═══════════════════════════════════════════════════ -->
+<div id="import-modal" class="overlay" style="display:none;" onclick="if(event.target===this)closeImportModal()">
+<div class="modal" style="max-width:540px;">
+  <div class="modal-title">📥 Import Colors</div>
+
+  <div class="tabs" id="import-tabs" style="margin-bottom:14px;">
+    <button class="tab active" onclick="switchImportTab('text',this)">Text / HEX</button>
+    <button class="tab" onclick="switchImportTab('json',this)">JSON</button>
+    <button class="tab" onclick="switchImportTab('css',this)">CSS</button>
+    <button class="tab" onclick="switchImportTab('file',this)">File</button>
+    <button class="tab" onclick="switchImportTab('url',this)">URL</button>
+  </div>
+
+  <!-- TEXT tab -->
+  <div id="itab-text">
+    <p style="font-size:11px;color:var(--text2);margin-bottom:8px;">Paste hex colors (comma, space, or newline separated). Supports #rgb, #rrggbb, rgb(), hsl().</p>
+    <textarea id="import-text" class="import-textarea" placeholder="#ff4f00, #3b82f6, #22a06b&#10;or one per line"></textarea>
+    <p id="import-text-preview" style="font-size:11px;color:var(--text3);margin-top:6px;"></p>
+  </div>
+
+  <!-- JSON tab -->
+  <div id="itab-json" style="display:none;">
+    <p style="font-size:11px;color:var(--text2);margin-bottom:8px;">Paste JSON array: <code style="font-family:'Space Mono',monospace;font-size:10px;">["#hex",...] or [{hex:"#...",...},...]</code></p>
+    <textarea id="import-json" class="import-textarea" placeholder='["#ff4f00","#3b82f6"] or [{"hex":"#ff4f00"},...]'></textarea>
+  </div>
+
+  <!-- CSS tab -->
+  <div id="itab-css" style="display:none;">
+    <p style="font-size:11px;color:var(--text2);margin-bottom:8px;">Paste CSS variables or any CSS containing color values.</p>
+    <textarea id="import-css" class="import-textarea" placeholder=":root { --primary: #ff4f00; --secondary: #3b82f6; }"></textarea>
+  </div>
+
+  <!-- FILE tab -->
+  <div id="itab-file" style="display:none;">
+    <div class="upload-zone" id="import-file-zone" onclick="document.getElementById('import-file-input').click()" style="margin-bottom:8px;">
+      <input type="file" id="import-file-input" accept=".json,.txt,.css,.scss,.svg,.aco" onchange="handleImportFile(event)" />
+      <div style="font-size:28px;margin-bottom:8px;">📄</div>
+      <p style="font-size:12px;">Drop .json, .txt, .css, .scss or click</p>
+    </div>
+    <p id="import-file-status" style="font-size:11px;color:var(--text3);"></p>
+  </div>
+
+  <!-- URL tab -->
+  <div id="itab-url" style="display:none;">
+    <p style="font-size:11px;color:var(--text2);margin-bottom:8px;">Paste a PalettePro share URL to load its colors.</p>
+    <input type="text" id="import-url" class="input" placeholder="https://…?p=…" style="font-size:11px;" />
+  </div>
+
+  <div class="div"></div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <label style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px;cursor:pointer;">
+      <input type="checkbox" id="import-merge" style="accent-color:var(--accent);cursor:pointer;" checked /> Merge with existing
+    </label>
+    <div style="flex:1;"></div>
+    <button class="btn btn-ghost" onclick="closeImportModal()">Cancel</button>
+    <button class="btn btn-primary" onclick="doImport()">Import</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ EXPORT MODAL ═══════════════════════════════════════════════════ -->
+<div id="export-modal" class="overlay" style="display:none;" onclick="if(event.target===this)closeExportModal()">
+<div class="modal" style="max-width:560px;">
+  <div class="modal-title">📤 Export Palette</div>
+
+  <div class="tabs" style="margin-bottom:14px;">
+    <button class="tab active" onclick="switchExportTab('json',this)">JSON</button>
+    <button class="tab" onclick="switchExportTab('css',this)">CSS</button>
+    <button class="tab" onclick="switchExportTab('tailwind',this)">Tailwind</button>
+    <button class="tab" onclick="switchExportTab('scss',this)">SCSS</button>
+    <button class="tab" onclick="switchExportTab('ase',this)">ASE</button>
+    <button class="tab" onclick="switchExportTab('svg',this)">SVG</button>
+    <button class="tab" onclick="switchExportTab('txt',this)">Plain</button>
+  </div>
+
+  <div id="export-code-wrap">
+    <div class="code-block" id="export-code"></div>
+  </div>
+
+  <div style="margin-top:10px;margin-bottom:4px;font-size:11px;color:var(--text3);">
+    Exporting <strong id="export-count">0</strong> colors
+    <span id="export-format-badge" class="format-badge" style="margin-left:6px;"></span>
+  </div>
+
+  <div class="div"></div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-soft" style="flex:1;" onclick="copyExportCode()">📋 Copy</button>
+    <button class="btn btn-primary" style="flex:1;" onclick="downloadExport()">⬇ Download</button>
+    <button class="btn btn-ghost btn-icon" onclick="closeExportModal()">✕</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ EDIT MODAL ═════════════════════════════════════════════════════ -->
+<div id="edit-modal" class="overlay" style="display:none;" onclick="if(event.target===this)closeEditModal()">
+<div class="modal" style="max-width:420px;">
+  <div class="modal-title">✏️ Edit Color</div>
+  <input type="hidden" id="edit-id" />
+
+  <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
+    <input type="color" id="edit-picker" style="width:56px;height:56px;border-radius:var(--r-sm);border:1.5px solid var(--border);cursor:pointer;padding:2px;background:var(--surface2);" oninput="syncEdit('picker')" />
+    <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+      <div>
+        <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:3px;font-weight:600;">HEX</label>
+        <input type="text" id="edit-hex" class="input" maxlength="7" oninput="syncEdit('hex')" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:3px;font-weight:600;">RGB</label>
+          <input type="text" id="edit-rgb" class="input" placeholder="255,79,0" oninput="syncEdit('rgb')" />
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--text3);display:block;font-weight:600;margin-bottom:3px;">HSL</label>
+          <input type="text" id="edit-hsl" class="input" placeholder="18,100,50" oninput="syncEdit('hsl')" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--surface2);border-radius:var(--r-sm);padding:10px;margin-bottom:14px;font-size:11px;color:var(--text2);font-family:'Space Mono',monospace;" id="edit-info"></div>
+
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-primary" style="flex:1;" onclick="saveEdit()">Save Changes</button>
+    <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══ SHARE MODAL ════════════════════════════════════════════════════ -->
+<div id="share-modal" class="overlay" style="display:none;" onclick="if(event.target===this)closeShareModal()">
+<div class="modal" style="max-width:460px;">
+  <div class="modal-title">🔗 Share Palette</div>
+  <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">Anyone with this URL can view and import your palette:</p>
+  <div style="display:flex;gap:8px;margin-bottom:14px;">
+    <input type="text" id="share-url" class="input" style="font-size:10px;" readonly />
+    <button class="btn btn-primary btn-sm" onclick="copyShareUrl()">Copy</button>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-ghost" style="flex:1;" onclick="closeShareModal()">Close</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+let colors = [];
+let history = [];
+let undoStack = [];
+let redoStack = [];
+let filter = 'all';
+let gradIds = new Set();
+let exportMode = 'json';
+let importTab = 'text';
+let editingId = null;
+let selectedIds = new Set();
+let importFileContent = '';
+
+// ══════════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════════
+function init() {
+  loadStorage();
+  loadFromURL();
+  bindEvents();
+  render();
+  updateGradient();
+}
+
+function loadStorage() {
+  try {
+    const c = localStorage.getItem('pp_colors'); if(c) colors = JSON.parse(c);
+    const h = localStorage.getItem('pp_history'); if(h) history = JSON.parse(h);
+    const t = localStorage.getItem('pp_theme'); if(t) applyTheme(t);
+  } catch(e) {}
+}
+
+function loadFromURL() {
+  const p = new URLSearchParams(location.search).get('p');
+  if (!p) return;
+  try {
+    const loaded = JSON.parse(atob(p));
+    if (Array.isArray(loaded) && loaded.length) { colors = loaded; save(); toast('Palette loaded from URL! 🎉'); }
+  } catch(e) {}
+}
+
+function save() {
+  localStorage.setItem('pp_colors', JSON.stringify(colors));
+  localStorage.setItem('pp_history', JSON.stringify(history));
+}
+
+// ══════════════════════════════════════════════════════════
+// COLOR MATH
+// ══════════════════════════════════════════════════════════
+function hexToRgb(hex) {
+  hex = hex.replace('#','');
+  if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
+  const n=parseInt(hex,16);
+  return {r:(n>>16)&255,g:(n>>8)&255,b:n&255};
+}
+function rgbToHex(r,g,b){return '#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');}
+function rgbToHsl(r,g,b){
+  r/=255;g/=255;b/=255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h,s,l=(mx+mn)/2;
+  if(mx===mn){h=s=0;}else{
+    const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);
+    switch(mx){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break;}
+  }
+  return {h:Math.round(h*360),s:Math.round(s*100),l:Math.round(l*100)};
+}
+function hslToRgb(h,s,l){
+  s/=100;l/=100;const k=n=>(n+h/30)%12;const a=s*Math.min(l,1-l);
+  const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+  return {r:Math.round(f(0)*255),g:Math.round(f(8)*255),b:Math.round(f(4)*255)};
+}
+function getLum(hex){
+  const{r,g,b}=hexToRgb(hex);
+  const lin=c=>{c/=255;return c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4);};
+  return .2126*lin(r)+.7152*lin(g)+.0722*lin(b);
+}
+function getContrast(h1,h2='#ffffff'){
+  const l1=getLum(h1),l2=getLum(h2);
+  return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);
+}
+function textOn(hex){return getLum(hex)>.35?'#000':'#fff';}
+function uid(){return '_'+Math.random().toString(36).substr(2,9);}
+
+function isHex(hex){return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex);}
+function norm(hex){
+  hex=hex.trim();if(!hex.startsWith('#'))hex='#'+hex;
+  if(hex.length===4)hex='#'+hex[1]+hex[1]+hex[2]+hex[2]+hex[3]+hex[3];
+  return hex.toLowerCase();
+}
+
+function rgbStringToHex(str) {
+  const m = str.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/i);
+  if(m) return rgbToHex(+m[1],+m[2],+m[3]);
+  return null;
+}
+function hslStringToHex(str) {
+  const m = str.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/i);
+  if(m) return rgbToHex(...Object.values(hslToRgb(+m[1],+m[2],+m[3])));
+  return null;
+}
+
+function parseAnyColor(s) {
+  s = s.trim();
+  if(!s) return null;
+  if(s.startsWith('#')) { const h=norm(s); return isHex(h)?h:null; }
+  if(s.toLowerCase().startsWith('rgb')) return rgbStringToHex(s.replace(/\s+/g,''));
+  if(s.toLowerCase().startsWith('hsl')) return hslStringToHex(s.replace(/\s+/g,''));
+  const h=norm(s); return isHex(h)?h:null;
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════
+function render() {
+  let vis = colors;
+  if(filter==='favorites') vis=colors.filter(c=>c.favorite);
+  if(filter==='locked') vis=colors.filter(c=>c.locked);
+  const q=(document.getElementById('searchin').value||'').toLowerCase();
+  if(q) vis=vis.filter(c=>c.hex.includes(q));
+
+  const grid=document.getElementById('grid'),empty=document.getElementById('empty');
+  document.getElementById('count').textContent=`${colors.length} color${colors.length!==1?'s':''}`;
+
+  if(vis.length===0){grid.innerHTML='';empty.style.display='block';}
+  else{
+    empty.style.display='none';
+    const ids=new Set(vis.map(c=>c.id));
+    [...grid.querySelectorAll('.cc')].forEach(el=>{if(!ids.has(el.dataset.id))el.remove();});
+    vis.forEach(c=>{
+      const existing=grid.querySelector(`[data-id="${c.id}"]`);
+      const html=buildCard(c);
+      if(existing){const tmp=document.createElement('div');tmp.innerHTML=html;const newEl=tmp.firstChild;existing.replaceWith(newEl);}
+      else{grid.insertAdjacentHTML('beforeend',html);}
+    });
+    vis.forEach(c=>grid.appendChild(grid.querySelector(`[data-id="${c.id}"]`)));
+  }
+
+  renderHistory();
+  renderGradSelSwatches();
+  updateGradient();
+  updateUndoRedo();
+  updateBulkBtn();
+}
+
+function buildCard(c) {
+  const{r,g,b}=hexToRgb(c.hex);
+  const{h,s,l}=rgbToHsl(r,g,b);
+  const txt=textOn(c.hex);
+  const cw=getContrast(c.hex,'#ffffff').toFixed(1);
+  const wcag=cw>=4.5?'AA':cw>=3?'AA Lg':'Fail';
+  const wcagColor=cw>=4.5?'#22a06b':cw>=3?'#d97706':'#dc2626';
+  const isGrad=gradIds.has(c.id);
+  const isSel=selectedIds.has(c.id);
+
+  return `<div class="cc${c.locked?' locked':''}${isGrad?' grad-sel':''}" data-id="${c.id}"
+    draggable="true" ondragstart="ds(event,'${c.id}')" ondragover="dov(event,'${c.id}')" ondrop="dd(event,'${c.id}')" ondragend="de(event)">
+    <input type="checkbox" class="cc-checkbox" ${isSel?'checked':''} onchange="toggleSel('${c.id}',this)" onclick="event.stopPropagation()" />
+    <div class="cc-swatch" style="background:${c.hex};" onclick="copyHex('${c.hex}')">
+      <div class="cc-hint" style="color:${txt}">⊕ Copy HEX</div>
+      <div class="cc-wcag" style="background:${wcagColor};">${wcag}</div>
+    </div>
+    <div class="cc-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span class="cc-hex">${c.hex.toUpperCase()}</span>
+        <button class="cc-btn star${c.favorite?' on':''}" onclick="toggleFav('${c.id}')" data-tip="${c.favorite?'Unfav':'Favorite'}">⭐</button>
+      </div>
+      <div class="cc-sub">rgb(${r},${g},${b})</div>
+      <div class="cc-sub">hsl(${h},${s}%,${l}%)</div>
+      <div class="cc-contrast" style="color:${wcagColor};">Contrast vs white: ${cw}:1</div>
+      <div class="cc-actions">
+        <button class="cc-btn" onclick="openEdit('${c.id}')" data-tip="Edit">✏️</button>
+        <button class="cc-btn" onclick="toggleLock('${c.id}')" data-tip="${c.locked?'Unlock':'Lock'}">${c.locked?'🔒':'🔓'}</button>
+        <button class="cc-btn${isGrad?' grad-on':''}" onclick="toggleGrad('${c.id}')" data-tip="Add to gradient">↔</button>
+        <button class="cc-btn" onclick="copyText('rgb(${r},${g},${b})','RGB')" data-tip="Copy RGB">RGB</button>
+        <button class="cc-btn danger" onclick="delColor('${c.id}')" data-tip="Delete">✕</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// ADD / DELETE
+// ══════════════════════════════════════════════════════════
+function addFromInput() {
+  const hexEl=document.getElementById('hexin');
+  const errEl=document.getElementById('hexerr');
+  let raw=hexEl.value.trim()||document.getElementById('cpicker').value;
+  const hex=norm(raw);
+  if(!isHex(hex)){
+    hexEl.classList.add('error');errEl.textContent='Invalid HEX. Example: #ff4f00';errEl.style.display='block';return;
+  }
+  hexEl.classList.remove('error');errEl.style.display='none';
+  pushUndo();
+  addColor(hex);
+  save();render();
+  hexEl.value='';
+  toast(`Added ${hex.toUpperCase()} ✓`);
+}
+
+function addColor(hex,locked=false,favorite=false) {
+  colors.push({id:uid(),hex:hex.toLowerCase(),locked,favorite});
+  addHist(hex);
+}
+
+function delColor(id){
+  pushUndo();colors=colors.filter(c=>c.id!==id);gradIds.delete(id);selectedIds.delete(id);save();render();toast('Removed');
+}
+
+function toggleLock(id){const c=colors.find(c=>c.id===id);if(c){c.locked=!c.locked;save();render();}}
+function toggleFav(id){const c=colors.find(c=>c.id===id);if(c){c.favorite=!c.favorite;save();render();}}
+function toggleGrad(id){gradIds.has(id)?gradIds.delete(id):gradIds.add(id);render();}
+
+function clearAll(){
+  if(!colors.length)return;pushUndo();colors=[];gradIds.clear();selectedIds.clear();save();render();toast('Cleared');
+}
+
+// ══════════════════════════════════════════════════════════
+// BULK SELECT
+// ══════════════════════════════════════════════════════════
+function toggleBulk(cb){
+  if(cb.checked) document.body.classList.add('select-mode');
+  else{document.body.classList.remove('select-mode');selectedIds.clear();render();}
+  updateBulkBtn();
+}
+function toggleSel(id,cb){cb.checked?selectedIds.add(id):selectedIds.delete(id);updateBulkBtn();}
+function updateBulkBtn(){
+  const btn=document.getElementById('bulk-delete-btn');
+  btn.style.display=selectedIds.size>0?'inline-flex':'none';
+  if(selectedIds.size>0) btn.textContent=`Delete ${selectedIds.size} selected`;
+}
+function bulkDelete(){
+  if(!selectedIds.size)return;pushUndo();colors=colors.filter(c=>!selectedIds.has(c.id));selectedIds.clear();save();render();toast('Deleted selected colors');
+}
+
+// ══════════════════════════════════════════════════════════
+// SORT
+// ══════════════════════════════════════════════════════════
+function sortColors(by){
+  pushUndo();
+  colors.sort((a,b)=>{
+    const ra=hexToRgb(a.hex),rb=hexToRgb(b.hex);
+    const ha=rgbToHsl(ra.r,ra.g,ra.b),hb=rgbToHsl(rb.r,rb.g,rb.b);
+    if(by==='hue') return ha.h-hb.h;
+    if(by==='light') return hb.l-ha.l;
+    if(by==='sat') return hb.s-ha.s;
+    if(by==='alpha') return a.hex.localeCompare(b.hex);
+    return 0;
+  });
+  save();render();toast(`Sorted by ${by}`);
+}
+
+// ══════════════════════════════════════════════════════════
+// HISTORY
+// ══════════════════════════════════════════════════════════
+function addHist(hex){hex=hex.toLowerCase();history=[hex,...history.filter(h=>h!==hex)].slice(0,24);save();}
+function renderHistory(){
+  const el=document.getElementById('history');
+  if(!history.length){el.innerHTML='<span style="font-size:11px;color:var(--text3);">None yet</span>';return;}
+  el.innerHTML=history.map(h=>`<div class="h-swatch" style="background:${h};" onclick="addHistColor('${h}')" data-tip="${h.toUpperCase()}"></div>`).join('');
+}
+function addHistColor(hex){pushUndo();addColor(hex);save();render();toast(`Added ${hex.toUpperCase()}`);}
+
+// ══════════════════════════════════════════════════════════
+// GENERATE
+// ══════════════════════════════════════════════════════════
+function genRandom(){
+  pushUndo();const locked=colors.filter(c=>c.locked);colors=[...locked];
+  for(let i=0;i<6;i++){const h='#'+Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6,'0');addColor(h);}
+  save();render();toast('Random palette! 🎲');
+}
+
+function genSmart(){
+  const type=document.getElementById('smart-type').value;
+  let base=colors.find(c=>!c.locked)?.hex||document.getElementById('hexin').value.trim()||null;
+  if(!base||!isHex(norm(base))){base='#'+Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6,'0');}
+  else base=norm(base);
+  pushUndo();const locked=colors.filter(c=>c.locked);colors=[...locked];
+  const palette=smartPalette(base,type);
+  [base,...palette].forEach(h=>addColor(h));
+  save();render();toast(`${type} palette! ✨`);
+}
+
+function smartPalette(hex,type){
+  const{r,g,b}=hexToRgb(hex);const{h,s,l}=rgbToHsl(r,g,b);
+  const sh=deg=>{const{r,g,b}=hslToRgb((h+deg+360)%360,s,l);return rgbToHex(r,g,b);};
+  const sl=(lv)=>{const{r,g,b}=hslToRgb(h,s,Math.max(5,Math.min(95,lv)));return rgbToHex(r,g,b);};
+  const ss=(sv)=>{const{r,g,b}=hslToRgb(h,Math.max(0,Math.min(100,sv)),l);return rgbToHex(r,g,b);};
+  switch(type){
+    case 'complementary':return[sh(180),sl(l+20),sl(l-20),sl(l+40)];
+    case 'analogous':return[sh(-30),sh(-15),sh(15),sh(30)];
+    case 'triadic':return[sh(120),sh(240),sl(l+15),sl(l-15)];
+    case 'split-comp':return[sh(150),sh(210),sl(l+20),sl(l-15)];
+    case 'tetradic':return[sh(90),sh(180),sh(270),sl(l+15)];
+    case 'monochromatic':return[sl(l+30),sl(l+15),sl(l-15),sl(l-30)];
+    case 'shades':return[sl(90),sl(70),sl(50),sl(30),sl(10)];
+    default:return[sh(180),sh(120),sh(240),sh(60)];
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// GRADIENT
+// ══════════════════════════════════════════════════════════
+function renderGradSelSwatches(){
+  const sel=colors.filter(c=>gradIds.has(c.id));
+  const el=document.getElementById('grad-sel-swatches');
+  el.innerHTML=sel.length?sel.map(c=>`<div style="width:22px;height:22px;border-radius:4px;background:${c.hex};border:1px solid rgba(0,0,0,.1);" title="${c.hex}"></div>`).join(''):'<span style="font-size:10px;color:var(--text3);">None selected</span>';
+}
+function updateGradient(){
+  const sel=colors.filter(c=>gradIds.has(c.id));
+  const hexes=sel.length>=2?sel.map(c=>c.hex):['#e8500a','#2563eb'];
+  const dir=document.getElementById('grad-dir').value;
+  const gradStr=dir==='circle'?`radial-gradient(circle,${hexes.join(',')})`:`linear-gradient(${dir},${hexes.join(',')})`;
+  document.getElementById('grad-preview').style.background=gradStr;
+  document.getElementById('grad-css').textContent=`background: ${gradStr};`;
+}
+function copyGradCSS(){navigator.clipboard.writeText(document.getElementById('grad-css').textContent);toast('Gradient CSS copied! 🎨');}
+
+// ══════════════════════════════════════════════════════════
+// COPY
+// ══════════════════════════════════════════════════════════
+function copyHex(hex){navigator.clipboard.writeText(hex);toast(`Copied ${hex.toUpperCase()}!`);}
+function copyText(t,label){navigator.clipboard.writeText(t);toast(`Copied ${label}!`);}
+function copyAllHex(){
+  if(!colors.length){toast('No colors!');return;}
+  navigator.clipboard.writeText(colors.map(c=>c.hex.toUpperCase()).join(', '));
+  toast(`Copied ${colors.length} HEX values 📋`);
+}
+
+// ══════════════════════════════════════════════════════════
+// SYNC PICKERS
+// ══════════════════════════════════════════════════════════
+function syncPicker(src){
+  if(src==='picker'){
+    const v=document.getElementById('cpicker').value;
+    document.getElementById('hexin').value=v;
+    document.getElementById('hexin').classList.remove('error');
+    document.getElementById('hexerr').style.display='none';
+  } else {
+    let v=document.getElementById('hexin').value.trim();
+    if(!v.startsWith('#'))v='#'+v;
+    if(isHex(v)) document.getElementById('cpicker').value=v;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// EDIT MODAL
+// ══════════════════════════════════════════════════════════
+function openEdit(id){
+  editingId=id;const c=colors.find(c=>c.id===id);if(!c)return;
+  const{r,g,b}=hexToRgb(c.hex);const{h,s,l}=rgbToHsl(r,g,b);
+  document.getElementById('edit-picker').value=c.hex;
+  document.getElementById('edit-hex').value=c.hex;
+  document.getElementById('edit-rgb').value=`${r},${g},${b}`;
+  document.getElementById('edit-hsl').value=`${h},${s},${l}`;
+  updateEditInfo(c.hex);
+  document.getElementById('edit-modal').style.display='flex';
+}
+function closeEditModal(){document.getElementById('edit-modal').style.display='none';editingId=null;}
+function updateEditInfo(hex){
+  const{r,g,b}=hexToRgb(hex);
+  const cw=getContrast(hex,'#ffffff').toFixed(2);
+  const cb=getContrast(hex,'#000000').toFixed(2);
+  const wcag=cw>=4.5?'AA ✓':cw>=3?'AA Large ✓':'Fail ✗';
+  document.getElementById('edit-info').innerHTML=`Contrast vs white: ${cw}:1 (${wcag}) &nbsp;|&nbsp; vs black: ${cb}:1`;
+}
+function syncEdit(src){
+  try{
+    if(src==='picker'||src==='hex'){
+      let h=src==='picker'?document.getElementById('edit-picker').value:norm(document.getElementById('edit-hex').value);
+      if(!isHex(h))return;
+      if(src==='hex')document.getElementById('edit-picker').value=h;
+      else document.getElementById('edit-hex').value=h;
+      const{r,g,b}=hexToRgb(h);const{h:hh,s,l}=rgbToHsl(r,g,b);
+      document.getElementById('edit-rgb').value=`${r},${g},${b}`;
+      document.getElementById('edit-hsl').value=`${hh},${s},${l}`;
+      updateEditInfo(h);
+    } else if(src==='rgb'){
+      const p=document.getElementById('edit-rgb').value.split(',').map(Number);
+      if(p.length===3&&p.every(n=>!isNaN(n))){
+        const h=rgbToHex(...p);document.getElementById('edit-picker').value=h;document.getElementById('edit-hex').value=h;
+        const{h:hh,s,l}=rgbToHsl(...p);document.getElementById('edit-hsl').value=`${hh},${s},${l}`;updateEditInfo(h);
+      }
+    } else if(src==='hsl'){
+      const p=document.getElementById('edit-hsl').value.split(',').map(Number);
+      if(p.length===3&&p.every(n=>!isNaN(n))){
+        const{r,g,b}=hslToRgb(...p);const h=rgbToHex(r,g,b);
+        document.getElementById('edit-picker').value=h;document.getElementById('edit-hex').value=h;
+        document.getElementById('edit-rgb').value=`${r},${g},${b}`;updateEditInfo(h);
+      }
+    }
+  }catch(e){}
+}
+function saveEdit(){
+  const hex=norm(document.getElementById('edit-hex').value);
+  if(!isHex(hex)){toast('Invalid HEX!');return;}
+  const c=colors.find(c=>c.id===editingId);
+  if(c){pushUndo();c.hex=hex;addHist(hex);save();render();toast('Updated ✓');}
+  closeEditModal();
+}
+
+// ══════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════
+function buildExport(fmt){
+  const hexes=colors.map(c=>c.hex.toUpperCase());
+  switch(fmt){
+    case 'json':
+      return JSON.stringify(colors.map((c,i)=>{
+        const{r,g,b}=hexToRgb(c.hex);const{h,s,l}=rgbToHsl(r,g,b);
+        return{name:`color-${i+1}`,hex:c.hex.toUpperCase(),rgb:{r,g,b},hsl:{h,s,l},locked:c.locked,favorite:c.favorite};
+      }),null,2);
+    case 'css':
+      return `:root {\n${hexes.map((h,i)=>`  --color-${i+1}: ${h};`).join('\n')}\n}`;
+    case 'tailwind':
+      return `// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n${hexes.map((h,i)=>`        'palette-${i+1}': '${h}',`).join('\n')}\n      },\n    },\n  },\n};`;
+    case 'scss':
+      return hexes.map((h,i)=>`$color-${i+1}: ${h};`).join('\n');
+    case 'ase':
+      // Simple Adobe Swatch Exchange text format (ACBL)
+      return hexes.join('\n');  // fallback plain list since binary ASE is complex
+    case 'svg':
+      const sw=60,pad=10,cols=Math.min(colors.length,8);
+      const rows=Math.ceil(colors.length/cols);
+      const W=cols*(sw+pad)+pad,H=rows*(sw+pad)+pad+30;
+      const rects=colors.map((c,i)=>{
+        const col=i%cols,row=Math.floor(i/cols);
+        const x=pad+col*(sw+pad),y=pad+row*(sw+pad);
+        return `<rect x="${x}" y="${y}" width="${sw}" height="${sw}" rx="6" fill="${c.hex}" /><text x="${x+sw/2}" y="${y+sw+14}" text-anchor="middle" font-family="monospace" font-size="8" fill="#666">${c.hex.toUpperCase()}</text>`;
+      }).join('\n');
+      return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">\n${rects}\n</svg>`;
+    case 'txt':
+      return hexes.join('\n');
+    default:return '';
+  }
+}
+
+function openExportModal(){
+  document.getElementById('export-modal').style.display='flex';
+  switchExportTab('json',document.querySelector('#export-modal .tab'));
+}
+function closeExportModal(){document.getElementById('export-modal').style.display='none';}
+function switchExportTab(fmt,btn){
+  exportMode=fmt;
+  document.querySelectorAll('#export-modal .tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('export-code').textContent=buildExport(fmt);
+  document.getElementById('export-count').textContent=colors.length;
+  document.getElementById('export-format-badge').textContent=fmt.toUpperCase();
+}
+function copyExportCode(){navigator.clipboard.writeText(buildExport(exportMode));toast('Code copied! 📋');}
+function downloadExport(){
+  const code=buildExport(exportMode);
+  const ext={json:'json',css:'css',tailwind:'js',scss:'scss',ase:'txt',svg:'svg',txt:'txt'}[exportMode]||'txt';
+  const mime={svg:'image/svg+xml'}[exportMode]||'text/plain';
+  const blob=new Blob([code],{type:mime});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`palette.${ext}`;a.click();
+  toast(`Downloaded palette.${ext} ⬇`);
+}
+
+// ══════════════════════════════════════════════════════════
+// IMPORT
+// ══════════════════════════════════════════════════════════
+function openImportModal(){
+  document.getElementById('import-modal').style.display='flex';
+  importFileContent='';
+  document.getElementById('import-text').value='';
+  document.getElementById('import-json').value='';
+  document.getElementById('import-css').value='';
+  document.getElementById('import-url').value='';
+  document.getElementById('import-file-status').textContent='';
+  document.getElementById('import-text-preview').textContent='';
+}
+function closeImportModal(){document.getElementById('import-modal').style.display='none';}
+
+function switchImportTab(tab,btn){
+  importTab=tab;
+  ['text','json','css','file','url'].forEach(t=>{
+    document.getElementById(`itab-${t}`).style.display=t===tab?'block':'none';
+  });
+  document.querySelectorAll('#import-tabs .tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+}
+
+document.addEventListener('input',e=>{
+  if(e.target.id==='import-text'){
+    const hexes=parseTextImport(e.target.value);
+    document.getElementById('import-text-preview').textContent=hexes.length?`Found ${hexes.length} color(s): ${hexes.slice(0,5).join(', ')}${hexes.length>5?'…':''}` : 'No valid colors found';
+  }
+});
+
+function handleImportFile(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    importFileContent=ev.target.result;
+    document.getElementById('import-file-status').textContent=`Loaded: ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  };
+  reader.readAsText(file);
+}
+
+function parseTextImport(text){
+  const tokens=text.split(/[\s,;\n\r|]+/);
+  return tokens.map(t=>parseAnyColor(t)).filter(Boolean);
+}
+
+function parseJSONImport(text){
+  const arr=JSON.parse(text);
+  if(!Array.isArray(arr))return[];
+  return arr.map(item=>{
+    if(typeof item==='string')return parseAnyColor(item);
+    if(typeof item==='object'&&item!==null){
+      const h=item.hex||item.color||item.value||item.HEX||'';
+      return parseAnyColor(h);
+    }
+    return null;
+  }).filter(Boolean);
+}
+
+function parseCSSImport(text){
+  const matches=[...text.matchAll(/#([0-9a-fA-F]{3,6})\b/g)];
+  const rgbs=[...text.matchAll(/rgb\([^)]+\)/gi)];
+  const hsls=[...text.matchAll(/hsl\([^)]+\)/gi)];
+  const hexes=matches.map(m=>parseAnyColor('#'+m[1]));
+  const rr=rgbs.map(m=>rgbStringToHex(m[0].replace(/\s+/g,'')));
+  const hh=hsls.map(m=>hslStringToHex(m[0].replace(/\s+/g,'')));
+  return [...hexes,...rr,...hh].filter(Boolean);
+}
+
+function doImport(){
+  let hexes=[];
+  try{
+    if(importTab==='text') hexes=parseTextImport(document.getElementById('import-text').value);
+    else if(importTab==='json') hexes=parseJSONImport(document.getElementById('import-json').value);
+    else if(importTab==='css') hexes=parseCSSImport(document.getElementById('import-css').value);
+    else if(importTab==='file'){
+      if(!importFileContent){toast('No file loaded!');return;}
+      // auto-detect format
+      try{ hexes=parseJSONImport(importFileContent); }catch(e){ hexes=parseCSSImport(importFileContent)||parseTextImport(importFileContent); }
+    }
+    else if(importTab==='url'){
+      const url=document.getElementById('import-url').value.trim();
+      const p=new URL(url).searchParams.get('p');
+      if(!p){toast('Invalid PalettePro URL');return;}
+      const loaded=JSON.parse(atob(p));
+      if(Array.isArray(loaded)) hexes=loaded.map(c=>c.hex||c).filter(h=>isHex(norm(h))).map(h=>norm(h));
+    }
+  }catch(err){ toast('Parse error: '+err.message);return; }
+
+  if(!hexes.length){toast('No valid colors found!');return;}
+  pushUndo();
+  const merge=document.getElementById('import-merge').checked;
+  if(!merge) colors=[];
+  // deduplicate
+  const existing=new Set(colors.map(c=>c.hex));
+  let added=0;
+  hexes.forEach(h=>{if(!existing.has(h)){addColor(h);existing.add(h);added++;}});
+  save();render();closeImportModal();
+  toast(`Imported ${added} color${added!==1?'s':''}! 📥`);
+}
+
+// ══════════════════════════════════════════════════════════
+// SHARE
+// ══════════════════════════════════════════════════════════
+function openShareModal(){
+  const encoded=btoa(JSON.stringify(colors));
+  const url=`${location.origin}${location.pathname}?p=${encoded}`;
+  document.getElementById('share-url').value=url;
+  document.getElementById('share-modal').style.display='flex';
+}
+function closeShareModal(){document.getElementById('share-modal').style.display='none';}
+function copyShareUrl(){navigator.clipboard.writeText(document.getElementById('share-url').value);toast('URL copied! 🔗');}
+
+// ══════════════════════════════════════════════════════════
+// UNDO / REDO
+// ══════════════════════════════════════════════════════════
+function pushUndo(){undoStack.push(JSON.stringify(colors));if(undoStack.length>60)undoStack.shift();redoStack=[];updateUndoRedo();}
+function undo(){if(!undoStack.length)return;redoStack.push(JSON.stringify(colors));colors=JSON.parse(undoStack.pop());save();render();toast('Undo ↩');}
+function redo(){if(!redoStack.length)return;undoStack.push(JSON.stringify(colors));colors=JSON.parse(redoStack.pop());save();render();toast('Redo ↪');}
+function updateUndoRedo(){
+  document.getElementById('undo-btn').style.opacity=undoStack.length?1:.35;
+  document.getElementById('redo-btn').style.opacity=redoStack.length?1:.35;
+}
+
+// ══════════════════════════════════════════════════════════
+// FILTER
+// ══════════════════════════════════════════════════════════
+function setFilter(f,btn){
+  filter=f;
+  document.querySelectorAll('#sidebar .tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  render();
+}
+
+// ══════════════════════════════════════════════════════════
+// DRAG & DROP
+// ══════════════════════════════════════════════════════════
+let dragId=null;
+function ds(e,id){dragId=id;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
+function dov(e,id){e.preventDefault();document.querySelectorAll('.cc').forEach(el=>el.classList.remove('drag-over'));e.currentTarget.classList.add('drag-over');}
+function dd(e,tid){
+  e.preventDefault();if(dragId===tid)return;
+  const fi=colors.findIndex(c=>c.id===dragId),ti=colors.findIndex(c=>c.id===tid);
+  if(fi<0||ti<0)return;pushUndo();const[m]=colors.splice(fi,1);colors.splice(ti,0,m);save();render();
+}
+function de(e){document.querySelectorAll('.cc').forEach(el=>el.classList.remove('dragging','drag-over'));dragId=null;}
+
+// ══════════════════════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════════════════════
+function toggleTheme(){const t=document.documentElement.getAttribute('data-theme');applyTheme(t==='dark'?'light':'dark');}
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('pp_theme',t);document.getElementById('theme-btn').textContent=t==='dark'?'☀️':'🌙';}
+
+// ══════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════
+function toast(msg,dur=2200){
+  const el=document.createElement('div');el.className='toast';el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),250);},dur);
+}
+
+// ══════════════════════════════════════════════════════════
+// IMAGE EXTRACTION
+// ══════════════════════════════════════════════════════════
+function extractColors(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.getElementById('img-canvas');const ctx=c.getContext('2d');
+      c.width=Math.min(img.width,200);c.height=Math.min(img.height,200);
+      ctx.drawImage(img,0,0,c.width,c.height);
+      const data=ctx.getImageData(0,0,c.width,c.height).data;
+      const map={};
+      for(let i=0;i<data.length;i+=4*6){
+        const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+        if(a<128)continue;
+        const qr=Math.round(r/32)*32,qg=Math.round(g/32)*32,qb=Math.round(b/32)*32;
+        const k=`${qr},${qg},${qb}`;map[k]=(map[k]||0)+1;
+      }
+      const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k])=>{const[r,g,b]=k.split(',').map(Number);return rgbToHex(r,g,b);});
+      if(!sorted.length){toast('Could not extract colors!');return;}
+      pushUndo();sorted.forEach(h=>addColor(h));save();render();toast(`Extracted ${sorted.length} colors! 🖼️`);
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);e.target.value='';
+}
+
+// ══════════════════════════════════════════════════════════
+// EVENTS
+// ══════════════════════════════════════════════════════════
+function bindEvents(){
+  document.addEventListener('keydown',e=>{
+    const tag=document.activeElement.tagName;
+    if(['INPUT','TEXTAREA','SELECT'].includes(tag))return;
+    if(e.key==='a'||e.key==='A'){document.getElementById('hexin').focus();return;}
+    if(e.key==='r'||e.key==='R'){genRandom();return;}
+    if(e.key==='t'||e.key==='T'){toggleTheme();return;}
+    if(e.key==='Backspace'){clearAll();return;}
+    if((e.key==='z')&&(e.ctrlKey||e.metaKey)){e.preventDefault();undo();}
+    if((e.key==='y')&&(e.ctrlKey||e.metaKey)){e.preventDefault();redo();}
+  });
+
+  const zone=document.getElementById('upload-zone');
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+  zone.addEventListener('drop',e=>{
+    e.preventDefault();zone.classList.remove('dragover');
+    const f=e.dataTransfer.files[0];
+    if(f&&f.type.startsWith('image/')){extractColors({target:{files:e.dataTransfer.files,value:''}});}
+  });
+
+  const importZone=document.getElementById('import-file-zone');
+  importZone.addEventListener('dragover',e=>{e.preventDefault();importZone.classList.add('dragover');});
+  importZone.addEventListener('dragleave',()=>importZone.classList.remove('dragover'));
+  importZone.addEventListener('drop',e=>{
+    e.preventDefault();importZone.classList.remove('dragover');
+    const f=e.dataTransfer.files[0];
+    if(f){document.getElementById('import-file-input').files=e.dataTransfer.files;handleImportFile({target:{files:e.dataTransfer.files}});}
+  });
+
+  document.getElementById('grad-dir').addEventListener('change',updateGradient);
+
+  // close modals on escape
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      ['import-modal','export-modal','edit-modal','share-modal'].forEach(id=>{
+        document.getElementById(id).style.display='none';
+      });
+    }
+  });
+}
+
+init();
+</script>
+</body>
+</html>
