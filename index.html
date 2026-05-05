@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PalettePro — Color Palette Builder</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
- <link rel="icon" type="image/png" href="logo.png"> 
+<link rel="icon" type="image/png" href="logo.png"> 
 <style>
 :root {
   --bg: #f5f3ef;
@@ -91,6 +91,10 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .input.error{border-color:var(--red);}
 select.input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a09b94' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
 
+/* ── COLOR NAME INPUT ───────────────────────── */
+.name-input{font-family:'Outfit',sans-serif !important;font-size:12px !important;color:var(--text2);}
+.name-input::placeholder{color:var(--text3);}
+
 /* ── COLOR PICKER ROW ───────────────────────── */
 .picker-row{display:flex;gap:8px;align-items:center;}
 .color-swatch-input{width:40px;height:36px;padding:2px;border-radius:var(--r-sm);border:1.5px solid var(--border);cursor:pointer;background:var(--surface2);}
@@ -119,6 +123,9 @@ select.input{cursor:pointer;appearance:none;background-image:url("data:image/svg
 .cc-hint{position:absolute;inset:0;background:rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-size:11px;font-weight:700;color:#fff;letter-spacing:.06em;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.5);}
 .cc-wcag{position:absolute;top:7px;right:7px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(0,0,0,.45);color:#fff;letter-spacing:.04em;}
 .cc-body{padding:10px;}
+.cc-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.cc-name:hover{color:var(--accent);}
+.cc-name.unnamed{color:var(--text3);font-weight:400;font-style:italic;}
 .cc-hex{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--text);}
 .cc-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--text3);margin-top:2px;}
 .cc-contrast{font-size:10px;font-weight:600;margin-top:4px;}
@@ -129,6 +136,9 @@ select.input{cursor:pointer;appearance:none;background-image:url("data:image/svg
 .cc-btn.star{color:var(--text3);}
 .cc-btn.star.on{color:#f59e0b;}
 .cc-btn.grad-on{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ── INLINE NAME EDIT ───────────────────────── */
+.cc-name-input{font-size:12px;font-weight:600;color:var(--text);background:var(--surface2);border:1.5px solid var(--accent);border-radius:4px;padding:2px 6px;outline:none;width:100%;font-family:'Outfit',sans-serif;margin-bottom:3px;}
 
 /* ── EMPTY ──────────────────────────────────── */
 #empty{display:none;text-align:center;padding:80px 20px;}
@@ -226,6 +236,10 @@ body.select-mode .cc-swatch{padding-left:26px;}
   <!-- Add Color -->
   <div class="s-section">
     <span class="s-label">Add Color</span>
+    <!-- Color Name Input (NEW) -->
+    <div style="margin-bottom:8px;">
+      <input type="text" id="colornamein" class="input name-input" placeholder="✏️ Color name (optional)" maxlength="40" style="font-family:'Outfit',sans-serif;font-size:12px;" onkeydown="if(event.key==='Enter')addFromInput()" />
+    </div>
     <div class="picker-row" style="margin-bottom:8px;">
       <input type="color" id="cpicker" class="color-swatch-input" value="#e8500a" oninput="syncPicker('picker')" />
       <input type="text" id="hexin" class="input" placeholder="#e8500a" maxlength="9" oninput="syncPicker('text')" onkeydown="if(event.key==='Enter')addFromInput()" style="flex:1;" />
@@ -394,13 +408,13 @@ body.select-mode .cc-swatch{padding-left:26px;}
 
   <!-- JSON tab -->
   <div id="itab-json" style="display:none;">
-    <p style="font-size:11px;color:var(--text2);margin-bottom:8px;">Paste JSON array: <code style="font-family:'Space Mono',monospace;font-size:10px;">["#hex",...] or [{hex:"#...",...},...]</code></p>
-    <textarea id="import-json" class="import-textarea" placeholder='["#ff4f00","#3b82f6"] or [{"hex":"#ff4f00"},...]'></textarea>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:8px;">Paste JSON array: <code style="font-family:'Space Mono',monospace;font-size:10px;">["#hex",...] or [{hex:"#...",name:"..."},...] </code></p>
+    <textarea id="import-json" class="import-textarea" placeholder='["#ff4f00","#3b82f6"] or [{"hex":"#ff4f00","name":"Flame"},...]'></textarea>
   </div>
 
   <!-- CSS tab -->
   <div id="itab-css" style="display:none;">
-    <p style="font-size:11px;color:var(--text2);margin-bottom:8px;">Paste CSS variables or any CSS containing color values.</p>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:8px;">Paste CSS variables or any CSS containing color values. Variable names will be used as color names.</p>
     <textarea id="import-css" class="import-textarea" placeholder=":root { --primary: #ff4f00; --secondary: #3b82f6; }"></textarea>
   </div>
 
@@ -470,6 +484,12 @@ body.select-mode .cc-swatch{padding-left:26px;}
 <div class="modal" style="max-width:420px;">
   <div class="modal-title">✏️ Edit Color</div>
   <input type="hidden" id="edit-id" />
+
+  <!-- Name field in edit modal -->
+  <div style="margin-bottom:12px;">
+    <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:3px;font-weight:600;">COLOR NAME</label>
+    <input type="text" id="edit-name" class="input name-input" placeholder="e.g. Burnt Orange, Ocean Blue…" maxlength="40" style="font-family:'Outfit',sans-serif;font-size:12px;" />
+  </div>
 
   <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;">
     <input type="color" id="edit-picker" style="width:56px;height:56px;border-radius:var(--r-sm);border:1.5px solid var(--border);cursor:pointer;padding:2px;background:var(--surface2);" oninput="syncEdit('picker')" />
@@ -627,6 +647,18 @@ function parseAnyColor(s) {
   const h=norm(s); return isHex(h)?h:null;
 }
 
+// ── NAME HELPERS ──────────────────────────────
+function slugifyName(name) {
+  return name.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'') || null;
+}
+function getDisplayName(c, index) {
+  return c.name && c.name.trim() ? c.name.trim() : null;
+}
+function getVarName(c, index) {
+  if(c.name && c.name.trim()) return slugifyName(c.name) || `color-${index+1}`;
+  return `color-${index+1}`;
+}
+
 // ══════════════════════════════════════════════════════════
 // RENDER
 // ══════════════════════════════════════════════════════════
@@ -635,7 +667,7 @@ function render() {
   if(filter==='favorites') vis=colors.filter(c=>c.favorite);
   if(filter==='locked') vis=colors.filter(c=>c.locked);
   const q=(document.getElementById('searchin').value||'').toLowerCase();
-  if(q) vis=vis.filter(c=>c.hex.includes(q));
+  if(q) vis=vis.filter(c=>c.hex.includes(q)||(c.name||'').toLowerCase().includes(q));
 
   const grid=document.getElementById('grid'),empty=document.getElementById('empty');
   document.getElementById('count').textContent=`${colors.length} color${colors.length!==1?'s':''}`;
@@ -670,6 +702,7 @@ function buildCard(c) {
   const wcagColor=cw>=4.5?'#22a06b':cw>=3?'#d97706':'#dc2626';
   const isGrad=gradIds.has(c.id);
   const isSel=selectedIds.has(c.id);
+  const displayName = c.name && c.name.trim() ? c.name.trim() : null;
 
   return `<div class="cc${c.locked?' locked':''}${isGrad?' grad-sel':''}" data-id="${c.id}"
     draggable="true" ondragstart="ds(event,'${c.id}')" ondragover="dov(event,'${c.id}')" ondrop="dd(event,'${c.id}')" ondragend="de(event)">
@@ -680,8 +713,13 @@ function buildCard(c) {
     </div>
     <div class="cc-body">
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <span class="cc-hex">${c.hex.toUpperCase()}</span>
+        <div style="flex:1;min-width:0;margin-right:4px;">
+          <div class="cc-name${displayName?'':' unnamed'}" onclick="startNameEdit('${c.id}')" data-tip="Click to rename" title="${displayName||'Click to add name'}">${displayName||'Unnamed — click to name'}</div>
+        </div>
         <button class="cc-btn star${c.favorite?' on':''}" onclick="toggleFav('${c.id}')" data-tip="${c.favorite?'Unfav':'Favorite'}">⭐</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span class="cc-hex">${c.hex.toUpperCase()}</span>
       </div>
       <div class="cc-sub">rgb(${r},${g},${b})</div>
       <div class="cc-sub">hsl(${h},${s}%,${l}%)</div>
@@ -697,27 +735,58 @@ function buildCard(c) {
   </div>`;
 }
 
+// ── INLINE NAME EDITING ────────────────────────
+function startNameEdit(id) {
+  const c = colors.find(c=>c.id===id);
+  if(!c) return;
+  const card = document.querySelector(`[data-id="${id}"]`);
+  if(!card) return;
+  const nameEl = card.querySelector('.cc-name');
+  if(!nameEl) return;
+  const current = c.name || '';
+  nameEl.outerHTML = `<input class="cc-name-input" id="ni-${id}" type="text" value="${current.replace(/"/g,'&quot;')}" placeholder="Color name…" maxlength="40" onblur="commitNameEdit('${id}')" onkeydown="if(event.key==='Enter')commitNameEdit('${id}');if(event.key==='Escape')cancelNameEdit('${id}')" />`;
+  const inp = document.getElementById(`ni-${id}`);
+  if(inp){inp.focus();inp.select();}
+}
+
+function commitNameEdit(id) {
+  const inp = document.getElementById(`ni-${id}`);
+  if(!inp) return;
+  const val = inp.value.trim();
+  const c = colors.find(c=>c.id===id);
+  if(c){ c.name = val; save(); }
+  render();
+  if(val) toast(`Named "${val}" ✓`);
+}
+
+function cancelNameEdit(id) {
+  render();
+}
+
 // ══════════════════════════════════════════════════════════
 // ADD / DELETE
 // ══════════════════════════════════════════════════════════
 function addFromInput() {
   const hexEl=document.getElementById('hexin');
   const errEl=document.getElementById('hexerr');
+  const nameEl=document.getElementById('colornamein');
   let raw=hexEl.value.trim()||document.getElementById('cpicker').value;
   const hex=norm(raw);
   if(!isHex(hex)){
     hexEl.classList.add('error');errEl.textContent='Invalid HEX. Example: #ff4f00';errEl.style.display='block';return;
   }
   hexEl.classList.remove('error');errEl.style.display='none';
+  const colorName = nameEl ? nameEl.value.trim() : '';
   pushUndo();
-  addColor(hex);
+  addColor(hex,false,false,colorName);
   save();render();
   hexEl.value='';
-  toast(`Added ${hex.toUpperCase()} ✓`);
+  if(nameEl) nameEl.value='';
+  toast(`Added ${hex.toUpperCase()}${colorName?' — '+colorName:''} ✓`);
 }
 
-function addColor(hex,locked=false,favorite=false) {
-  colors.push({id:uid(),hex:hex.toLowerCase(),locked,favorite});
+function addColor(hex, locked=false, favorite=false, name='') {
+  colors.push({id:uid(), hex:hex.toLowerCase(), locked, favorite, name: name||''});
   addHist(hex);
 }
 
@@ -822,7 +891,7 @@ function smartPalette(hex,type){
 function renderGradSelSwatches(){
   const sel=colors.filter(c=>gradIds.has(c.id));
   const el=document.getElementById('grad-sel-swatches');
-  el.innerHTML=sel.length?sel.map(c=>`<div style="width:22px;height:22px;border-radius:4px;background:${c.hex};border:1px solid rgba(0,0,0,.1);" title="${c.hex}"></div>`).join(''):'<span style="font-size:10px;color:var(--text3);">None selected</span>';
+  el.innerHTML=sel.length?sel.map(c=>`<div style="width:22px;height:22px;border-radius:4px;background:${c.hex};border:1px solid rgba(0,0,0,.1);" title="${c.name||c.hex}"></div>`).join(''):'<span style="font-size:10px;color:var(--text3);">None selected</span>';
 }
 function updateGradient(){
   const sel=colors.filter(c=>gradIds.has(c.id));
@@ -867,6 +936,7 @@ function syncPicker(src){
 function openEdit(id){
   editingId=id;const c=colors.find(c=>c.id===id);if(!c)return;
   const{r,g,b}=hexToRgb(c.hex);const{h,s,l}=rgbToHsl(r,g,b);
+  document.getElementById('edit-name').value = c.name || '';
   document.getElementById('edit-picker').value=c.hex;
   document.getElementById('edit-hex').value=c.hex;
   document.getElementById('edit-rgb').value=`${r},${g},${b}`;
@@ -912,13 +982,14 @@ function syncEdit(src){
 function saveEdit(){
   const hex=norm(document.getElementById('edit-hex').value);
   if(!isHex(hex)){toast('Invalid HEX!');return;}
+  const name = document.getElementById('edit-name').value.trim();
   const c=colors.find(c=>c.id===editingId);
-  if(c){pushUndo();c.hex=hex;addHist(hex);save();render();toast('Updated ✓');}
+  if(c){pushUndo();c.hex=hex;c.name=name;addHist(hex);save();render();toast('Updated ✓');}
   closeEditModal();
 }
 
 // ══════════════════════════════════════════════════════════
-// EXPORT
+// EXPORT — names included in all formats
 // ══════════════════════════════════════════════════════════
 function buildExport(fmt){
   const hexes=colors.map(c=>c.hex.toUpperCase());
@@ -926,29 +997,57 @@ function buildExport(fmt){
     case 'json':
       return JSON.stringify(colors.map((c,i)=>{
         const{r,g,b}=hexToRgb(c.hex);const{h,s,l}=rgbToHsl(r,g,b);
-        return{name:`color-${i+1}`,hex:c.hex.toUpperCase(),rgb:{r,g,b},hsl:{h,s,l},locked:c.locked,favorite:c.favorite};
+        return{
+          name: c.name && c.name.trim() ? c.name.trim() : `color-${i+1}`,
+          hex:c.hex.toUpperCase(),
+          rgb:{r,g,b},
+          hsl:{h,s,l},
+          locked:c.locked,
+          favorite:c.favorite
+        };
       }),null,2);
     case 'css':
-      return `:root {\n${hexes.map((h,i)=>`  --color-${i+1}: ${h};`).join('\n')}\n}`;
+      return `:root {\n${colors.map((c,i)=>{
+        const varName = getVarName(c,i);
+        const comment = c.name && c.name.trim() ? ` /* ${c.name.trim()} */` : '';
+        return `  --${varName}: ${c.hex.toUpperCase()};${comment}`;
+      }).join('\n')}\n}`;
     case 'tailwind':
-      return `// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n${hexes.map((h,i)=>`        'palette-${i+1}': '${h}',`).join('\n')}\n      },\n    },\n  },\n};`;
+      return `// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n${colors.map((c,i)=>{
+        const key = c.name && c.name.trim() ? slugifyName(c.name) || `palette-${i+1}` : `palette-${i+1}`;
+        return `        '${key}': '${c.hex.toUpperCase()}',`;
+      }).join('\n')}\n      },\n    },\n  },\n};`;
     case 'scss':
-      return hexes.map((h,i)=>`$color-${i+1}: ${h};`).join('\n');
+      return colors.map((c,i)=>{
+        const varName = getVarName(c,i);
+        const comment = c.name && c.name.trim() ? ` // ${c.name.trim()}` : '';
+        return `$${varName}: ${c.hex.toUpperCase()};${comment}`;
+      }).join('\n');
     case 'ase':
-      // Simple Adobe Swatch Exchange text format (ACBL)
-      return hexes.join('\n');  // fallback plain list since binary ASE is complex
+      // Name-annotated plain list (binary ASE is complex)
+      return colors.map((c,i)=>{
+        const label = c.name && c.name.trim() ? c.name.trim() : `Color ${i+1}`;
+        return `${label}: ${c.hex.toUpperCase()}`;
+      }).join('\n');
     case 'svg':
-      const sw=60,pad=10,cols=Math.min(colors.length,8);
+      const sw=80,pad=10,labelH=28,cols=Math.min(colors.length,8);
       const rows=Math.ceil(colors.length/cols);
-      const W=cols*(sw+pad)+pad,H=rows*(sw+pad)+pad+30;
+      const W=cols*(sw+pad)+pad,H=rows*(sw+pad+labelH)+pad;
       const rects=colors.map((c,i)=>{
         const col=i%cols,row=Math.floor(i/cols);
-        const x=pad+col*(sw+pad),y=pad+row*(sw+pad);
-        return `<rect x="${x}" y="${y}" width="${sw}" height="${sw}" rx="6" fill="${c.hex}" /><text x="${x+sw/2}" y="${y+sw+14}" text-anchor="middle" font-family="monospace" font-size="8" fill="#666">${c.hex.toUpperCase()}</text>`;
+        const x=pad+col*(sw+pad),y=pad+row*(sw+pad+labelH);
+        const displayN = c.name && c.name.trim() ? c.name.trim() : c.hex.toUpperCase();
+        const hexLabel = c.name && c.name.trim() ? c.hex.toUpperCase() : '';
+        return `<rect x="${x}" y="${y}" width="${sw}" height="${sw}" rx="6" fill="${c.hex}" />`+
+          `<text x="${x+sw/2}" y="${y+sw+14}" text-anchor="middle" font-family="monospace" font-size="8" fill="#555" font-weight="bold">${displayN.length>12?displayN.slice(0,11)+'…':displayN}</text>`+
+          (hexLabel?`<text x="${x+sw/2}" y="${y+sw+24}" text-anchor="middle" font-family="monospace" font-size="7" fill="#999">${hexLabel}</text>`:'');
       }).join('\n');
       return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">\n${rects}\n</svg>`;
     case 'txt':
-      return hexes.join('\n');
+      return colors.map((c,i)=>{
+        const label = c.name && c.name.trim() ? `${c.name.trim()}: ` : '';
+        return `${label}${c.hex.toUpperCase()}`;
+      }).join('\n');
     default:return '';
   }
 }
@@ -977,7 +1076,7 @@ function downloadExport(){
 }
 
 // ══════════════════════════════════════════════════════════
-// IMPORT
+// IMPORT — supports name field from JSON & CSS vars
 // ══════════════════════════════════════════════════════════
 function openImportModal(){
   document.getElementById('import-modal').style.display='flex';
@@ -1002,8 +1101,8 @@ function switchImportTab(tab,btn){
 
 document.addEventListener('input',e=>{
   if(e.target.id==='import-text'){
-    const hexes=parseTextImport(e.target.value);
-    document.getElementById('import-text-preview').textContent=hexes.length?`Found ${hexes.length} color(s): ${hexes.slice(0,5).join(', ')}${hexes.length>5?'…':''}` : 'No valid colors found';
+    const pairs=parseTextImportWithNames(e.target.value);
+    document.getElementById('import-text-preview').textContent=pairs.length?`Found ${pairs.length} color(s): ${pairs.slice(0,5).map(p=>p.hex).join(', ')}${pairs.length>5?'…':''}` : 'No valid colors found';
   }
 });
 
@@ -1017,62 +1116,74 @@ function handleImportFile(e){
   reader.readAsText(file);
 }
 
-function parseTextImport(text){
+// Returns [{hex, name}]
+function parseTextImportWithNames(text){
   const tokens=text.split(/[\s,;\n\r|]+/);
-  return tokens.map(t=>parseAnyColor(t)).filter(Boolean);
+  return tokens.map(t=>parseAnyColor(t)).filter(Boolean).map(h=>({hex:h,name:''}));
 }
 
-function parseJSONImport(text){
+function parseJSONImportWithNames(text){
   const arr=JSON.parse(text);
   if(!Array.isArray(arr))return[];
   return arr.map(item=>{
-    if(typeof item==='string')return parseAnyColor(item);
+    if(typeof item==='string'){const h=parseAnyColor(item);return h?{hex:h,name:''}:null;}
     if(typeof item==='object'&&item!==null){
-      const h=item.hex||item.color||item.value||item.HEX||'';
-      return parseAnyColor(h);
+      const hraw=item.hex||item.color||item.value||item.HEX||'';
+      const h=parseAnyColor(hraw);
+      const name=item.name||item.label||item.title||'';
+      return h?{hex:h,name:String(name).trim()}:null;
     }
     return null;
   }).filter(Boolean);
 }
 
-function parseCSSImport(text){
-  const matches=[...text.matchAll(/#([0-9a-fA-F]{3,6})\b/g)];
-  const rgbs=[...text.matchAll(/rgb\([^)]+\)/gi)];
-  const hsls=[...text.matchAll(/hsl\([^)]+\)/gi)];
-  const hexes=matches.map(m=>parseAnyColor('#'+m[1]));
-  const rr=rgbs.map(m=>rgbStringToHex(m[0].replace(/\s+/g,'')));
-  const hh=hsls.map(m=>hslStringToHex(m[0].replace(/\s+/g,'')));
-  return [...hexes,...rr,...hh].filter(Boolean);
+function parseCSSImportWithNames(text){
+  // Extract CSS var names paired with colors
+  const results=[];
+  const varMatches=[...text.matchAll(/--([a-zA-Z0-9_-]+)\s*:\s*([^;]+);/g)];
+  varMatches.forEach(m=>{
+    const raw=m[2].trim();
+    const hex=parseAnyColor(raw)||(raw.startsWith('rgb')?rgbStringToHex(raw.replace(/\s+/g,'')):null)||(raw.startsWith('hsl')?hslStringToHex(raw.replace(/\s+/g,'')):null);
+    if(hex){
+      // Convert var name to readable label: --brand-primary → Brand Primary
+      const name=m[1].replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
+      results.push({hex,name});
+    }
+  });
+  // Fall back to plain hex extraction for colors not in vars
+  if(!results.length){
+    const matches=[...text.matchAll(/#([0-9a-fA-F]{3,6})\b/g)];
+    matches.forEach(m=>{const h=parseAnyColor('#'+m[1]);if(h)results.push({hex:h,name:''});});
+  }
+  return results;
 }
 
 function doImport(){
-  let hexes=[];
+  let pairs=[];
   try{
-    if(importTab==='text') hexes=parseTextImport(document.getElementById('import-text').value);
-    else if(importTab==='json') hexes=parseJSONImport(document.getElementById('import-json').value);
-    else if(importTab==='css') hexes=parseCSSImport(document.getElementById('import-css').value);
+    if(importTab==='text') pairs=parseTextImportWithNames(document.getElementById('import-text').value);
+    else if(importTab==='json') pairs=parseJSONImportWithNames(document.getElementById('import-json').value);
+    else if(importTab==='css') pairs=parseCSSImportWithNames(document.getElementById('import-css').value);
     else if(importTab==='file'){
       if(!importFileContent){toast('No file loaded!');return;}
-      // auto-detect format
-      try{ hexes=parseJSONImport(importFileContent); }catch(e){ hexes=parseCSSImport(importFileContent)||parseTextImport(importFileContent); }
+      try{ pairs=parseJSONImportWithNames(importFileContent); }catch(e){ pairs=parseCSSImportWithNames(importFileContent)||parseTextImportWithNames(importFileContent); }
     }
     else if(importTab==='url'){
       const url=document.getElementById('import-url').value.trim();
       const p=new URL(url).searchParams.get('p');
       if(!p){toast('Invalid PalettePro URL');return;}
       const loaded=JSON.parse(atob(p));
-      if(Array.isArray(loaded)) hexes=loaded.map(c=>c.hex||c).filter(h=>isHex(norm(h))).map(h=>norm(h));
+      if(Array.isArray(loaded)) pairs=loaded.map(c=>({hex:norm(c.hex||c),name:c.name||''})).filter(p=>isHex(p.hex));
     }
   }catch(err){ toast('Parse error: '+err.message);return; }
 
-  if(!hexes.length){toast('No valid colors found!');return;}
+  if(!pairs.length){toast('No valid colors found!');return;}
   pushUndo();
   const merge=document.getElementById('import-merge').checked;
   if(!merge) colors=[];
-  // deduplicate
   const existing=new Set(colors.map(c=>c.hex));
   let added=0;
-  hexes.forEach(h=>{if(!existing.has(h)){addColor(h);existing.add(h);added++;}});
+  pairs.forEach(({hex,name})=>{if(!existing.has(hex)){addColor(hex,false,false,name);existing.add(hex);added++;}});
   save();render();closeImportModal();
   toast(`Imported ${added} color${added!==1?'s':''}! 📥`);
 }
@@ -1174,7 +1285,7 @@ function bindEvents(){
   document.addEventListener('keydown',e=>{
     const tag=document.activeElement.tagName;
     if(['INPUT','TEXTAREA','SELECT'].includes(tag))return;
-    if(e.key==='a'||e.key==='A'){document.getElementById('hexin').focus();return;}
+    if(e.key==='a'||e.key==='A'){document.getElementById('colornamein').focus();return;}
     if(e.key==='r'||e.key==='R'){genRandom();return;}
     if(e.key==='t'||e.key==='T'){toggleTheme();return;}
     if(e.key==='Backspace'){clearAll();return;}
@@ -1210,6 +1321,11 @@ function bindEvents(){
       });
     }
   });
+}
+
+// ── HELPER exposed globally ──
+function slugifyName(name) {
+  return name.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'') || null;
 }
 
 init();
